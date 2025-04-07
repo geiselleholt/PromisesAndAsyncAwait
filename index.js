@@ -10,9 +10,14 @@ async function getUserData(id) {
 
   try {
     const dbNumber = await central(id);
+
     const [dbData, vaultData] = await Promise.all([
-      dbs[dbNumber](id),
-      vault(id),
+      dbs[dbNumber](id).catch((error) => {
+        throw new Error(`Database number ${dbNumber} failed: ${error.message}`);
+      }),
+      vault(id).catch((error) => {
+        throw new Error(`Vault failed: ${error.message}`);
+      }),
     ]);
 
     return {
@@ -39,6 +44,10 @@ async function getUserData(id) {
       },
     };
   } catch (error) {
-    console.error("Failed to get user data from", dbNumber);
+    console.log(error);
   }
 }
+
+getUserData(10)
+  .then((user) => console.log(user))
+  .catch((error) => console.error(error));
